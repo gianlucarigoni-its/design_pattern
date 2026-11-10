@@ -121,7 +121,7 @@ export class OrdersController {
       items,
       total,
       status: 'paid',
-      alphaChargeId: charge ? charge.chargeId : null,
+      paymentId: charge ? charge.chargeId : null,
       createdAt: new Date().toISOString(),
     };
     this.orders.save(order);
@@ -151,13 +151,13 @@ export class OrdersController {
     const event = this.events.findById(order.eventId)!;
     const venue = this.venues.findById(event.venueId)!;
 
-    if (order.alphaChargeId) {
+    if (order.paymentId) {
       const client = new AlphaPayClient(process.env.ALPHA_API_KEY ?? 'sk_test_tickethub');
       let done = false;
       for (let attempt = 1; attempt <= 2 && !done; attempt++) {
         try {
-          console.log(`[alpha] rimborso tentativo ${attempt} ${order.alphaChargeId}`);
-          await client.refund(order.alphaChargeId, Math.round(order.total * 100));
+          console.log(`[alpha] rimborso tentativo ${attempt} ${order.paymentId}`);
+          await client.refund(order.paymentId, Math.round(order.total * 100));
           done = true;
         } catch (err) {
           if (err instanceof AlphaTimeoutError) {
